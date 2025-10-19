@@ -46,7 +46,20 @@ Parse a resume file (PDF, DOC, DOCX)
 ```bash
 cd backend
 npm install
+
+# Create environment file
+echo "OPENAI_API_KEY=your-openai-api-key-here" > .env
+
 npm start
+```
+
+## Environment Variables
+
+Create a `.env` file in the backend directory with:
+
+```
+OPENAI_API_KEY=your-openai-api-key-here
+PORT=3001
 ```
 
 ## Usage
