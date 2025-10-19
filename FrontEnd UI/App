@@ -1,0 +1,106 @@
+import { useState } from "react";
+import { Navigation } from "./components/Navigation";
+import { HomePage } from "./components/HomePage";
+import { OpportunitiesPage } from "./components/OpportunitiesPage";
+import { ClassesPage } from "./components/ClassesPage";
+import { ProfilePage } from "./components/ProfilePage";
+import { ScholarshipsPage } from "./components/ScholarshipsPage";
+import { ResearchPage } from "./components/ResearchPage";
+import { AIChatDock } from "./components/AIChatDock";
+import { motion } from "motion/react";
+
+export default function App() {
+  const [currentPage, setCurrentPage] = useState("home");
+
+  const renderPage = () => {
+    switch (currentPage) {
+      case "home":
+        return <HomePage />;
+      case "opportunities":
+        return <OpportunitiesPage />;
+      case "classes":
+        return <ClassesPage />;
+      case "scholarships":
+        return <ScholarshipsPage />;
+      case "research":
+        return <ResearchPage />;
+      case "profile":
+        return <ProfilePage />;
+      case "settings":
+        return <PlaceholderPage title="Settings" icon="⚙️" />;
+      default:
+        return <HomePage />;
+    }
+  };
+
+  return (
+    <div className="min-h-screen bg-gradient-to-br from-gray-50 via-purple-50/30 to-amber-50/30 relative overflow-hidden">
+      {/* Animated background elements */}
+      <div className="fixed inset-0 -z-10 overflow-hidden pointer-events-none">
+        <motion.div
+          className="absolute top-1/4 left-1/4 w-96 h-96 bg-[var(--university-primary)] rounded-full opacity-10 blur-3xl"
+          animate={{
+            x: [0, 100, 0],
+            y: [0, 50, 0],
+            scale: [1, 1.2, 1]
+          }}
+          transition={{
+            duration: 20,
+            repeat: Infinity,
+            ease: "easeInOut"
+          }}
+        />
+        <motion.div
+          className="absolute bottom-1/4 right-1/4 w-96 h-96 bg-[var(--university-secondary)] rounded-full opacity-10 blur-3xl"
+          animate={{
+            x: [0, -100, 0],
+            y: [0, -50, 0],
+            scale: [1.2, 1, 1.2]
+          }}
+          transition={{
+            duration: 25,
+            repeat: Infinity,
+            ease: "easeInOut"
+          }}
+        />
+      </div>
+
+      {/* Navigation */}
+      <Navigation currentPage={currentPage} onPageChange={setCurrentPage} />
+
+      {/* Main content */}
+      <main className="ml-20 min-h-screen">
+        <motion.div
+          key={currentPage}
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          exit={{ opacity: 0, y: -20 }}
+          transition={{ duration: 0.3 }}
+        >
+          {renderPage()}
+        </motion.div>
+      </main>
+
+      {/* AI Chat Dock */}
+      <AIChatDock />
+    </div>
+  );
+}
+
+function PlaceholderPage({ title, icon }: { title: string; icon: string }) {
+  return (
+    <div className="max-w-7xl mx-auto px-8 py-16">
+      <motion.div
+        initial={{ scale: 0.9, opacity: 0 }}
+        animate={{ scale: 1, opacity: 1 }}
+        className="bg-white/60 backdrop-blur-xl rounded-3xl p-16 border border-gray-200/50 text-center"
+      >
+        <div className="text-8xl mb-6">{icon}</div>
+        <h1 className="mb-4">{title}</h1>
+        <p className="text-gray-600">
+          This page is coming soon. The AI is working on building something amazing for you!
+        </p>
+      </motion.div>
+    </div>
+  );
+}
