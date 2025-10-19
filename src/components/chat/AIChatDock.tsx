@@ -6,7 +6,6 @@ import { supabase } from "../../lib/supabase";
 import { Message } from "../../types";
 import { AIAvatar } from "./AIAvatar";
 // 🔧 PRODUCTION INTEGRATION - AWS Lambda + Bedrock AI Pipeline
-import { generateResearchEmailsWithAI } from "../../agents/aiIntegrationPlaceholder";
 
 // Mock research opportunities data
 const MOCK_OPPORTUNITIES = [
@@ -351,7 +350,7 @@ These opportunities align well with your background in **${profile.major || 'you
       // 🔧 PRODUCTION OPTION - Use AWS Lambda + Bedrock AI Pipeline (COMMENTED OUT - AWS QUOTA PENDING)
       // const productionResponse = await generateResearchEmailsWithAI(profile);
       // const aiResponse = formatProductionResponse(productionResponse);
-      
+
       // 🎯 CURRENT: Use OpenAI for hackathon demo
       const aiResponse = await callOpenAIDrafting(profile, matchedOpportunities, inputValue);
 
@@ -411,7 +410,7 @@ These opportunities align well with your background in **${profile.major || 'you
       //   professorRanking: 'all'
       // });
       // const emailResponse = formatProductionEmailResponse(productionResponse.opportunities[0]);
-      
+
       // 🎯 CURRENT: Use OpenAI for hackathon demo
       const topOpportunity = matchedOpportunities[0];
       const emailResponse = await generatePersonalizedEmail(profile, topOpportunity, action);

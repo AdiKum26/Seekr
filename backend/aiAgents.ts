@@ -5,16 +5,16 @@
 
 /**
  * AWS Lambda AI Agent Integration - Production Ready
- * 
+ *
  * This file contains the complete AI agent pipeline that has been built and tested
  * independently in AWS. The entire system is functional and ready for production.
- * 
+ *
  * Architecture:
  * - Frontend triggers Lambda via API Gateway
  * - Lambda scrapes UW research opportunities using Bedrock AI
  * - Bedrock generates personalized emails using GPT-4
  * - Results stored in DynamoDB and returned to frontend
- * 
+ *
  * Status: FULLY IMPLEMENTED - Intentionally disabled due to AWS rate limits during hackathon
  */
 
@@ -24,7 +24,7 @@
 // AWS Lambda function names (already deployed and tested)
 const AI_AGENT_FUNCTIONS = {
   RESEARCH_SCRAPER: "seekr-research-scraper",
-  EMAIL_GENERATOR: "seekr-email-generator", 
+  EMAIL_GENERATOR: "seekr-email-generator",
   OPPORTUNITY_MATCHER: "seekr-opportunity-matcher",
   ANALYTICS_TRACKER: "seekr-analytics-tracker"
 };
@@ -38,7 +38,7 @@ const DYNAMODB_TABLES = {
 
 /**
  * 🚀 MAIN AI AGENT - Auto-generate research emails
- * 
+ *
  * This function orchestrates the complete AI pipeline:
  * 1. Scrape UW research opportunities
  * 2. Match opportunities to student profile
@@ -48,7 +48,7 @@ const DYNAMODB_TABLES = {
  */
 // export async function autoGenerateEmail(studentProfile: any) {
 //   console.log('🤖 Triggering AWS AI Agent Pipeline...');
-  
+
 //   try {
 //     // Step 1: Scrape research opportunities
 //     const opportunities = await invokeLambda(AI_AGENT_FUNCTIONS.RESEARCH_SCRAPER, {
@@ -108,7 +108,7 @@ const DYNAMODB_TABLES = {
 
 /**
  * 🔍 RESEARCH OPPORTUNITY SCRAPER
- * 
+ *
  * Lambda function that scrapes UW research opportunities using Bedrock AI
  * - Scans department websites
  * - Extracts professor information
@@ -135,7 +135,7 @@ const DYNAMODB_TABLES = {
 
 /**
  * 🎯 OPPORTUNITY MATCHING ENGINE
- * 
+ *
  * Lambda function that uses Bedrock AI to match opportunities to student profiles
  * - Analyzes student skills and interests
  * - Scores opportunities based on relevance
@@ -168,7 +168,7 @@ const DYNAMODB_TABLES = {
 
 /**
  * ✍️ EMAIL GENERATION AGENT
- * 
+ *
  * Lambda function that uses Bedrock GPT-4 to generate personalized emails
  * - Creates compelling subject lines
  * - Writes personalized email content
@@ -202,7 +202,7 @@ const DYNAMODB_TABLES = {
 
 /**
  * 📊 ANALYTICS AND TRACKING
- * 
+ *
  * Lambda function that tracks user interactions and email performance
  * - Monitors email open rates
  * - Tracks response rates
@@ -224,12 +224,12 @@ const DYNAMODB_TABLES = {
 
 /**
  * 💾 DYNAMODB STORAGE FUNCTIONS
- * 
+ *
  * Functions to store and retrieve data from DynamoDB tables
  */
 // async function storeResultsInDynamoDB(userId: string, data: any) {
 //   const dynamodb = new DynamoDB.DocumentClient();
-  
+
 //   await dynamodb.put({
 //     TableName: DYNAMODB_TABLES.OPPORTUNITIES,
 //     Item: {
@@ -243,7 +243,7 @@ const DYNAMODB_TABLES = {
 
 // async function getUserAnalytics(userId: string) {
 //   const dynamodb = new DynamoDB.DocumentClient();
-  
+
 //   const result = await dynamodb.query({
 //     TableName: DYNAMODB_TABLES.EMAIL_ANALYTICS,
 //     KeyConditionExpression: 'user_id = :userId',
@@ -253,13 +253,13 @@ const DYNAMODB_TABLES = {
 //     ScanIndexForward: false,
 //     Limit: 50
 //   }).promise();
-  
+
 //   return result.Items;
 // }
 
 /**
  * 🎯 PLACEHOLDER RESPONSE - Shows exact production structure
- * 
+ *
  * This is what the production system returns when fully deployed
  */
 export function getMockProductionResponse() {
@@ -287,7 +287,8 @@ export function getMockProductionResponse() {
 // 🚀 PRODUCTION EXPORTS
 // =============================
 export {
-  AI_AGENT_FUNCTIONS,
-  DYNAMODB_TABLES,
-  getMockProductionResponse
+    AI_AGENT_FUNCTIONS,
+    DYNAMODB_TABLES,
+    getMockProductionResponse
 };
+

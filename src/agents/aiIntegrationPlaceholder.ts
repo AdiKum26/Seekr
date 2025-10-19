@@ -1,16 +1,16 @@
 /**
 /**
  * 🔧 PRODUCTION AI INTEGRATION - AWS Lambda + Bedrock Email Agent
- * 
+ *
  * This file contains the production-ready integration code for our AWS infrastructure.
  * The entire pipeline is built and tested - only awaiting IAM permissions and Bedrock quota approval.
- * 
+ *
  * Architecture:
  * - Frontend triggers AWS Lambda function via API Gateway
  * - Lambda scrapes research opportunities using Bedrock AI agents
  * - Bedrock generates personalized emails using GPT-4
  * - Results stored in DynamoDB and returned to frontend
- * 
+ *
  * Status: 90% Complete - Production ready pending AWS quota approval
  */
 
@@ -58,13 +58,13 @@ interface ResearchEmailResponse {
 
 /**
  * 🔧 PRODUCTION FUNCTION - AWS Lambda Integration
- * 
+ *
  * This function will trigger our complete AWS pipeline:
  * 1. Lambda scrapes UW research opportunities
  * 2. Bedrock AI matches opportunities to student profile
  * 3. Bedrock generates personalized emails using GPT-4
  * 4. Results cached in DynamoDB for performance
- * 
+ *
  * Currently using mock data - production ready pending AWS quota approval
  */
 export async function generateResearchEmailsWithAI(
@@ -75,7 +75,7 @@ export async function generateResearchEmailsWithAI(
     professorRanking?: 'senior' | 'junior' | 'all';
   }
 ): Promise<ResearchEmailResponse> {
-  
+
   console.log('🚀 Triggering AWS Lambda + Bedrock AI Pipeline...');
   console.log('📊 Student Profile:', {
     name: userProfile.full_name,
@@ -123,7 +123,7 @@ export async function generateResearchEmailsWithAI(
 
   // 🎯 MOCK RESPONSE - Production structure, temporary data
   console.log('⚠️  Using mock data - Production API ready pending AWS quota approval');
-  
+
   return {
     success: true,
     opportunities: [
@@ -194,11 +194,11 @@ ${userProfile.email}`,
 
 /**
  * 🔧 PRODUCTION FUNCTION - Real-time Opportunity Monitoring
- * 
+ *
  * This function will set up real-time monitoring of new research opportunities
  * using AWS EventBridge + Lambda triggers. When new opportunities are posted,
  * students get instant notifications with AI-generated application emails.
- * 
+ *
  * Status: Architecture complete, pending AWS deployment
  */
 export async function setupRealTimeOpportunityMonitoring(
@@ -209,9 +209,9 @@ export async function setupRealTimeOpportunityMonitoring(
     frequency: 'instant' | 'daily' | 'weekly';
   }
 ): Promise<{ success: boolean; webhookId: string }> {
-  
+
   console.log('🔔 Setting up real-time opportunity monitoring...');
-  
+
   // 🔧 PRODUCTION WEBHOOK SETUP - Ready for deployment (COMMENTED OUT - AWS QUOTA PENDING)
   // const response = await fetch('/api/setup-monitoring', {
   //   method: 'POST',
@@ -238,10 +238,10 @@ export async function setupRealTimeOpportunityMonitoring(
 
 /**
  * 📊 PRODUCTION FUNCTION - Analytics and Performance Tracking
- * 
+ *
  * This function tracks the performance of AI-generated emails and provides
  * analytics on application success rates, response times, and optimization suggestions.
- * 
+ *
  * Status: Analytics pipeline complete, pending AWS deployment
  */
 export async function getApplicationAnalytics(
@@ -259,9 +259,9 @@ export async function getApplicationAnalytics(
     outcome: 'accepted' | 'rejected' | 'pending';
   }>;
 }> {
-  
+
   console.log('📊 Fetching application analytics...');
-  
+
   // 🔧 PRODUCTION ANALYTICS API - Ready for deployment (COMMENTED OUT - AWS QUOTA PENDING)
   // const response = await fetch(`/api/analytics/applications?timeRange=${timeRange}`, {
   //   method: 'GET',
@@ -295,7 +295,6 @@ export async function getApplicationAnalytics(
 
 // 🔧 EXPORT ALL PRODUCTION FUNCTIONS
 export {
-  PRODUCTION_API_ENDPOINT,
-  type ResearchEmailResponse
+    PRODUCTION_API_ENDPOINT,
+    type ResearchEmailResponse
 };
-
