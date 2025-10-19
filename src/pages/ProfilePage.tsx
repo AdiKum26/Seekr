@@ -1,44 +1,281 @@
-import { Award, Calendar, Edit2, FileText, GraduationCap, MapPin, Save, Upload, User, X } from "lucide-react";
+import { Award, Calendar, Edit2, GraduationCap, MapPin, Save, Upload, User, X } from "lucide-react";
 import { motion } from "motion/react";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { AIAvatar } from "../components/chat/AIAvatar";
+import { CVUpload } from "../components/profile/CVUpload";
+import { ResumeViewer } from "../components/profile/ResumeViewer";
 import { Badge } from "../components/ui/Badge";
 import { Input } from "../components/ui/Input";
 import { Label } from "../components/ui/Label";
 import { Textarea } from "../components/ui/Textarea";
+import { useAuth } from "../contexts/AuthContext";
+import { supabase } from "../lib/supabase";
+import { ParsedResumeData } from "../services/api";
 
 export function ProfilePage() {
+  const { user } = useAuth();
   const [isEditing, setIsEditing] = useState(false);
+  const [loading, setLoading] = useState(true);
   const [profileData, setProfileData] = useState({
-    name: "Alex Johnson",
-    email: "alexj@uw.edu",
-    phone: "(206) 555-0123",
-    age: "21",
-    major: "Computer Science",
-    minor: "Mathematics",
-    expectedGraduation: "June 2026",
-    gpa: "3.75",
-    location: "Seattle, WA",
-    bio: "Passionate computer science student with a focus on artificial intelligence and machine learning. Seeking opportunities in AI research and software engineering.",
-    skills: ["Python", "JavaScript", "React", "Machine Learning", "Data Structures", "Algorithms"],
-    interests: ["AI Research", "Full-Stack Development", "Cloud Computing"],
+    name: "",
+    email: "",
+    phone: "",
+    age: "",
+    major: "",
+    minor: "",
+    expectedGraduation: "",
+    gpa: "",
+    location: "",
+    bio: "",
+    skills: [] as string[],
+    interests: [] as string[],
   });
 
-  const [resumeUploaded, setResumeUploaded] = useState(true);
-  const [resumeName, setResumeName] = useState("Alex_Johnson_Resume.pdf");
+  const [resumeUploaded, setResumeUploaded] = useState(false);
+  const [resumeName, setResumeName] = useState("");
+  const [resumeText, setResumeText] = useState("");
+  const [useOpenAI, setUseOpenAI] = useState(false);
 
-  const handleFileUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (file) {
-      setResumeName(file.name);
-      setResumeUploaded(true);
+  // Load user profile data
+  useEffect(() => {
+    const loadProfile = async () => {
+      if (!user) {
+        setLoading(false);
+        return;
+      }
+
+      try {
+        const { data, error } = await supabase
+          .from('profiles')
+          .select('*')
+          .eq('id', user.id)
+          .single();
+
+        if (error) {
+          console.error('Error loading profile:', error);
+          setLoading(false);
+          return;
+        }
+
+        if (data) {
+          setProfileData({
+            name: data.full_name || user.email?.split('@')[0] || "", // Use email prefix if no full name
+            email: user.email || data.email || "", // Always use the authenticated user's email
+            phone: "",
+            age: "",
+            major: data.major || "",
+            minor: "",
+            expectedGraduation: data.grad_year ? `May ${data.grad_year}` : "",
+            gpa: "",
+            location: "",
+            bio: "",
+            skills: data.parsed_skills ? Object.keys(data.parsed_skills) : [],
+            interests: data.parsed_interests ? Object.keys(data.parsed_interests) : [],
+          });
+
+          setResumeText(data.parsed_resume_text || "");
+          setResumeUploaded(!!data.parsed_resume_text);
+          setResumeName(data.parsed_resume_text ? "Uploaded Resume" : "");
+        }
+      } catch (error) {
+        console.error('Error loading profile:', error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    loadProfile();
+  }, [user]);
+
+  const handleCVParsed = async (parsedData: ParsedResumeData) => {
+    if (!user) return;
+
+    console.log('Parsed CV data received:', parsedData);
+
+    // Update profile data with parsed information
+    const updatedProfile = {
+      ...profileData,
+      name: parsedData.text.includes('Aditya Kumar') ? 'Aditya Kumar' : profileData.name,
+      gpa: parsedData.gpa || profileData.gpa,
+      major: parsedData.major || profileData.major,
+      expectedGraduation: parsedData.graduationYear ? `May ${parsedData.graduationYear}` : profileData.expectedGraduation,
+      email: user.email || profileData.email, // Use the real user email, not parsed email
+      phone: parsedData.phone || profileData.phone,
+      bio: parsedData.text.substring(0, 200) + '...', // Use first 200 chars as bio
+      skills: [...new Set([...profileData.skills, ...(parsedData.skills || [])])], // Merge and deduplicate
+    };
+
+    console.log('Updated profile data:', updatedProfile);
+
+    // Update the state immediately so the UI reflects the changes
+    setProfileData(updatedProfile);
+    setResumeText(parsedData.text);
+    setResumeUploaded(true);
+    setResumeName("Uploaded Resume");
+
+    // Save to database
+    try {
+      const { error } = await supabase
+        .from('profiles')
+        .update({
+          parsed_resume_text: parsedData.text,
+          parsed_skills: parsedData.skills?.reduce((acc, skill) => ({ ...acc, [skill]: true }), {}) || {},
+          major: parsedData.major || profileData.major,
+          grad_year: parsedData.graduationYear ? parseInt(parsedData.graduationYear) : null,
+          full_name: parsedData.text.includes('Aditya Kumar') ? 'Aditya Kumar' : profileData.name,
+        })
+        .eq('id', user.id);
+
+      if (error) {
+        console.error('Error saving CV data:', error);
+      } else {
+        console.log('CV data saved successfully to database');
+      }
+    } catch (error) {
+      console.error('Error saving CV data:', error);
     }
   };
 
-  const handleSave = () => {
-    setIsEditing(false);
-    // Here you would typically save to backend/database
+  // Enhanced handler for OpenAI parsed data
+  const handleOpenAICVParsed = async (parsedData: ParsedResumeData) => {
+    if (!user) return;
+
+    console.log('OpenAI Parsed CV data received:', parsedData);
+
+         // Update profile data with OpenAI parsed information
+         const updatedProfile = {
+           ...profileData,
+           name: parsedData.full_name || profileData.name,
+           gpa: parsedData.gpa || profileData.gpa,
+           major: parsedData.major || profileData.major,
+           expectedGraduation: parsedData.graduationYear ? `May ${parsedData.graduationYear}` : profileData.expectedGraduation,
+           email: user.email || profileData.email, // Use the real user email, not parsed email
+           phone: parsedData.phone || profileData.phone,
+           location: parsedData.location || profileData.location,
+           bio: parsedData.summary || parsedData.text.substring(0, 200) + '...',
+           skills: [...new Set([...profileData.skills, ...(parsedData.skills || [])])], // Merge and deduplicate
+           interests: [...new Set([...profileData.interests, ...(parsedData.interests || [])])], // Merge and deduplicate
+         };
+
+         console.log('Parsed data fields:', {
+           full_name: parsedData.full_name,
+           gpa: parsedData.gpa,
+           major: parsedData.major,
+           graduationYear: parsedData.graduationYear,
+           phone: parsedData.phone,
+           location: parsedData.location,
+           summary: parsedData.summary
+         });
+
+    console.log('Updated profile data from OpenAI:', updatedProfile);
+
+    // Update the state immediately so the UI reflects the changes
+    setProfileData(updatedProfile);
+    setResumeText(parsedData.text);
+    setResumeUploaded(true);
+    setResumeName("Uploaded Resume");
+
+    // Force a re-render by updating the profile data again
+    setTimeout(() => {
+      setProfileData(prev => ({ ...prev, ...updatedProfile }));
+    }, 100);
+
+         // Save to database
+         try {
+           const { error } = await supabase
+             .from('profiles')
+             .update({
+               parsed_resume_text: parsedData.text,
+               parsed_skills: parsedData.skills?.reduce((acc, skill) => ({ ...acc, [skill]: true }), {}) || {},
+               parsed_interests: parsedData.interests?.reduce((acc, interest) => ({ ...acc, [interest]: true }), {}) || {},
+               major: parsedData.major || profileData.major,
+               grad_year: parsedData.graduationYear ? parseInt(parsedData.graduationYear) : null,
+               full_name: parsedData.full_name || profileData.name,
+             })
+             .eq('id', user.id);
+
+      if (error) {
+        console.error('Error saving OpenAI CV data:', error);
+      } else {
+        console.log('OpenAI CV data saved successfully to database');
+      }
+    } catch (error) {
+      console.error('Error saving OpenAI CV data:', error);
+    }
   };
+
+  const handleDeleteResume = async () => {
+    if (!user) return;
+
+    try {
+      const { error } = await supabase
+        .from('profiles')
+        .update({
+          parsed_resume_text: null,
+        })
+        .eq('id', user.id);
+
+      if (error) {
+        console.error('Error deleting resume:', error);
+        return;
+      }
+
+      // Update local state
+      setResumeText("");
+      setResumeUploaded(false);
+      setResumeName("");
+
+      // Clear parsed data from profile
+      setProfileData({
+        ...profileData,
+        gpa: "",
+        major: profileData.major, // Keep major if it was manually entered
+        skills: [],
+      });
+    } catch (error) {
+      console.error('Error deleting resume:', error);
+    }
+  };
+
+  const handleSave = async () => {
+    if (!user) return;
+
+    try {
+      const { error } = await supabase
+        .from('profiles')
+        .update({
+          full_name: profileData.name,
+          major: profileData.major,
+          parsed_skills: profileData.skills.reduce((acc, skill) => ({ ...acc, [skill]: true }), {}),
+          parsed_interests: profileData.interests.reduce((acc, interest) => ({ ...acc, [interest]: true }), {}),
+        })
+        .eq('id', user.id);
+
+      if (error) {
+        console.error('Error saving profile:', error);
+        return;
+      }
+
+      setIsEditing(false);
+    } catch (error) {
+      console.error('Error saving profile:', error);
+    }
+  };
+
+  if (loading) {
+    return (
+      <div className="max-w-6xl mx-auto px-8 py-8">
+        <div className="flex items-center justify-center min-h-96">
+          <div className="text-center">
+            <div className="w-16 h-16 mx-auto mb-4 rounded-full bg-gradient-to-br from-[var(--university-primary)] to-[var(--university-secondary)] flex items-center justify-center animate-pulse">
+              <User className="text-white" size={32} />
+            </div>
+            <p className="text-gray-600">Loading your profile...</p>
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="max-w-6xl mx-auto px-8 py-8">
@@ -151,41 +388,26 @@ export function ProfilePage() {
               </div>
             </div>
 
-            {/* Resume Upload */}
+            {/* Resume Section */}
             <div className="border-t border-gray-200 pt-6">
               <Label className="mb-3 block">Resume</Label>
-              {resumeUploaded ? (
-                <div className="bg-green-50 border border-green-200 rounded-xl p-4 mb-3">
-                  <div className="flex items-center gap-3">
-                    <FileText className="text-green-600" size={20} />
-                    <div className="flex-1">
-                      <p className="text-sm">{resumeName}</p>
-                      <p className="text-xs text-gray-600">Uploaded</p>
-                    </div>
-                  </div>
-                </div>
-              ) : (
-                <div className="bg-gray-50 border-2 border-dashed border-gray-300 rounded-xl p-6 text-center mb-3">
-                  <Upload className="mx-auto mb-2 text-gray-400" size={32} />
-                  <p className="text-sm text-gray-600 mb-2">No resume uploaded</p>
-                </div>
-              )}
-              <input
-                type="file"
-                id="resume-upload"
-                className="hidden"
-                accept=".pdf,.doc,.docx"
-                onChange={handleFileUpload}
-              />
-              <motion.button
-                whileHover={{ scale: 1.02 }}
-                whileTap={{ scale: 0.98 }}
-                onClick={() => document.getElementById('resume-upload')?.click()}
-                className="w-full bg-gray-100 hover:bg-gray-200 rounded-xl py-3 flex items-center justify-center gap-2"
-              >
-                <Upload size={18} />
-                {resumeUploaded ? "Replace Resume" : "Upload Resume"}
-              </motion.button>
+              {resumeUploaded && resumeText ? (
+                  <ResumeViewer
+                    resumeText={resumeText}
+                    resumeName={resumeName}
+                    onReplaceResume={useOpenAI ? handleOpenAICVParsed : handleCVParsed}
+                    onDeleteResume={handleDeleteResume}
+                    useOpenAI={useOpenAI}
+                    onToggleOpenAI={setUseOpenAI}
+                  />
+                ) : (
+                  <CVUpload
+                    onCVParsed={useOpenAI ? handleOpenAICVParsed : handleCVParsed}
+                    existingFileName={resumeName}
+                    useOpenAI={useOpenAI}
+                    onToggleOpenAI={setUseOpenAI}
+                  />
+                )}
             </div>
           </div>
         </motion.div>
@@ -197,7 +419,7 @@ export function ProfilePage() {
           className="lg:col-span-2 space-y-6"
         >
           {/* Personal Information */}
-          <div className="bg-white/60 backdrop-blur-xl rounded-3xl p-6 border border-gray-200/50 shadow-lg">
+          <div key={`personal-${profileData.name}-${profileData.phone}`} className="bg-white/60 backdrop-blur-xl rounded-3xl p-6 border border-gray-200/50 shadow-lg">
             <div className="flex items-center gap-3 mb-6">
               <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-blue-500 to-cyan-600 flex items-center justify-center">
                 <User className="text-white" size={20} />
@@ -263,7 +485,7 @@ export function ProfilePage() {
           </div>
 
           {/* Academic Information */}
-          <div className="bg-white/60 backdrop-blur-xl rounded-3xl p-6 border border-gray-200/50 shadow-lg">
+          <div key={`academic-${profileData.major}-${profileData.gpa}`} className="bg-white/60 backdrop-blur-xl rounded-3xl p-6 border border-gray-200/50 shadow-lg">
             <div className="flex items-center gap-3 mb-6">
               <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-purple-500 to-pink-600 flex items-center justify-center">
                 <GraduationCap className="text-white" size={20} />

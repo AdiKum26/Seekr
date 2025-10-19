@@ -1,5 +1,6 @@
-import { Award, BookOpen, Briefcase, FlaskConical, Home, User } from "lucide-react";
+import { Award, Briefcase, FlaskConical, Home, LogOut, User } from "lucide-react";
 import { motion } from "motion/react";
+import { useAuth } from "../../contexts/AuthContext";
 import { AIAvatar } from "../chat/AIAvatar";
 
 interface NavigationProps {
@@ -8,10 +9,11 @@ interface NavigationProps {
 }
 
 export function Navigation({ currentPage, onPageChange }: NavigationProps) {
+  const { signOut } = useAuth();
+
   const navItems = [
     { id: "home", label: "Home", icon: Home },
     { id: "opportunities", label: "Opportunities", icon: Briefcase },
-    { id: "classes", label: "Classes", icon: BookOpen },
     { id: "scholarships", label: "Scholarships", icon: Award },
     { id: "research", label: "Research", icon: FlaskConical },
     { id: "profile", label: "My Profile", icon: User }
@@ -69,6 +71,23 @@ export function Navigation({ currentPage, onPageChange }: NavigationProps) {
             </motion.button>
           );
         })}
+      </div>
+
+      {/* Sign Out Button */}
+      <div className="mt-auto">
+        <motion.button
+          onClick={signOut}
+          className="w-12 h-12 rounded-xl flex items-center justify-center text-gray-600 hover:bg-red-50 hover:text-red-600 transition-all group relative"
+          whileHover={{ scale: 1.05 }}
+          whileTap={{ scale: 0.95 }}
+        >
+          <LogOut size={20} />
+
+          {/* Tooltip */}
+          <div className="absolute left-20 bg-gray-900 text-white px-3 py-1.5 rounded-lg opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none whitespace-nowrap z-50">
+            Sign Out
+          </div>
+        </motion.button>
       </div>
     </motion.nav>
   );
