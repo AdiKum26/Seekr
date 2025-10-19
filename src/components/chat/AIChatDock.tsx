@@ -5,6 +5,8 @@ import { v4 as uuidv4 } from 'uuid';
 import { supabase } from "../../lib/supabase";
 import { Message } from "../../types";
 import { AIAvatar } from "./AIAvatar";
+// 🔧 PRODUCTION INTEGRATION - AWS Lambda + Bedrock AI Pipeline
+import { generateResearchEmailsWithAI } from "../../agents/aiIntegrationPlaceholder";
 
 // Mock research opportunities data
 const MOCK_OPPORTUNITIES = [
@@ -345,7 +347,12 @@ These opportunities align well with your background in **${profile.major || 'you
       // Step 2: Match opportunities
       const matchedOpportunities = await matchOpportunities(profile);
 
-      // Step 3: Call OpenAI for intelligent response
+      // Step 3: Call AI for intelligent response
+      // 🔧 PRODUCTION OPTION - Use AWS Lambda + Bedrock AI Pipeline (COMMENTED OUT - AWS QUOTA PENDING)
+      // const productionResponse = await generateResearchEmailsWithAI(profile);
+      // const aiResponse = formatProductionResponse(productionResponse);
+      
+      // 🎯 CURRENT: Use OpenAI for hackathon demo
       const aiResponse = await callOpenAIDrafting(profile, matchedOpportunities, inputValue);
 
       // Step 4: Add AI response to messages
@@ -397,7 +404,15 @@ These opportunities align well with your background in **${profile.major || 'you
         throw new Error('No opportunities found to apply for');
       }
 
-      // Generate personalized email for the top opportunity
+      // 🔧 PRODUCTION OPTION - Use AWS Lambda + Bedrock AI Pipeline (COMMENTED OUT - AWS QUOTA PENDING)
+      // const productionResponse = await generateResearchEmailsWithAI(profile, {
+      //   maxOpportunities: 1,
+      //   focusAreas: ['Computer Science', 'AI/ML', 'Research'],
+      //   professorRanking: 'all'
+      // });
+      // const emailResponse = formatProductionEmailResponse(productionResponse.opportunities[0]);
+      
+      // 🎯 CURRENT: Use OpenAI for hackathon demo
       const topOpportunity = matchedOpportunities[0];
       const emailResponse = await generatePersonalizedEmail(profile, topOpportunity, action);
 
