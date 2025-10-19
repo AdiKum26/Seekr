@@ -1,0 +1,422 @@
+import { Award, Calendar, Edit2, FileText, GraduationCap, MapPin, Save, Upload, User, X } from "lucide-react";
+import { motion } from "motion/react";
+import { useState } from "react";
+import { AIAvatar } from "../components/chat/AIAvatar";
+import { Badge } from "../components/ui/Badge";
+import { Input } from "../components/ui/Input";
+import { Label } from "../components/ui/Label";
+import { Textarea } from "../components/ui/Textarea";
+
+export function ProfilePage() {
+  const [isEditing, setIsEditing] = useState(false);
+  const [profileData, setProfileData] = useState({
+    name: "Alex Johnson",
+    email: "alexj@uw.edu",
+    phone: "(206) 555-0123",
+    age: "21",
+    major: "Computer Science",
+    minor: "Mathematics",
+    expectedGraduation: "June 2026",
+    gpa: "3.75",
+    location: "Seattle, WA",
+    bio: "Passionate computer science student with a focus on artificial intelligence and machine learning. Seeking opportunities in AI research and software engineering.",
+    skills: ["Python", "JavaScript", "React", "Machine Learning", "Data Structures", "Algorithms"],
+    interests: ["AI Research", "Full-Stack Development", "Cloud Computing"],
+  });
+
+  const [resumeUploaded, setResumeUploaded] = useState(true);
+  const [resumeName, setResumeName] = useState("Alex_Johnson_Resume.pdf");
+
+  const handleFileUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      setResumeName(file.name);
+      setResumeUploaded(true);
+    }
+  };
+
+  const handleSave = () => {
+    setIsEditing(false);
+    // Here you would typically save to backend/database
+  };
+
+  return (
+    <div className="max-w-6xl mx-auto px-8 py-8">
+      {/* Header */}
+      <motion.div
+        initial={{ y: -20, opacity: 0 }}
+        animate={{ y: 0, opacity: 1 }}
+        className="mb-8 flex items-center justify-between"
+      >
+        <div>
+          <h1 className="mb-2">My Profile</h1>
+          <p className="text-gray-600">
+            Manage your profile information to help AI find the best opportunities for you
+          </p>
+        </div>
+        {!isEditing ? (
+          <motion.button
+            whileHover={{ scale: 1.05 }}
+            whileTap={{ scale: 0.95 }}
+            onClick={() => setIsEditing(true)}
+            className="px-6 py-3 bg-gradient-to-r from-[var(--university-primary)] to-[var(--university-secondary)] text-white rounded-xl flex items-center gap-2"
+          >
+            <Edit2 size={18} />
+            Edit Profile
+          </motion.button>
+        ) : (
+          <div className="flex gap-3">
+            <motion.button
+              whileHover={{ scale: 1.05 }}
+              whileTap={{ scale: 0.95 }}
+              onClick={() => setIsEditing(false)}
+              className="px-6 py-3 bg-gray-200 hover:bg-gray-300 text-gray-700 rounded-xl flex items-center gap-2"
+            >
+              <X size={18} />
+              Cancel
+            </motion.button>
+            <motion.button
+              whileHover={{ scale: 1.05 }}
+              whileTap={{ scale: 0.95 }}
+              onClick={handleSave}
+              className="px-6 py-3 bg-gradient-to-r from-[var(--university-primary)] to-[var(--university-secondary)] text-white rounded-xl flex items-center gap-2"
+            >
+              <Save size={18} />
+              Save Changes
+            </motion.button>
+          </div>
+        )}
+      </motion.div>
+
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        {/* Left Column - Profile Card */}
+        <motion.div
+          initial={{ x: -20, opacity: 0 }}
+          animate={{ x: 0, opacity: 1 }}
+          className="lg:col-span-1"
+        >
+          <div className="bg-white/60 backdrop-blur-xl rounded-3xl p-6 border border-gray-200/50 shadow-lg sticky top-8">
+            {/* Profile Picture */}
+            <div className="flex flex-col items-center mb-6">
+              <div className="relative mb-4">
+                <div className="w-32 h-32 rounded-full bg-gradient-to-br from-[var(--university-primary)] to-[var(--university-secondary)] flex items-center justify-center text-white text-4xl overflow-hidden">
+                  <User size={64} />
+                </div>
+                {isEditing && (
+                  <motion.button
+                    whileHover={{ scale: 1.1 }}
+                    className="absolute bottom-0 right-0 w-10 h-10 rounded-full bg-white border-2 border-gray-200 flex items-center justify-center shadow-lg"
+                  >
+                    <Upload size={18} className="text-gray-600" />
+                  </motion.button>
+                )}
+              </div>
+              <h2 className="text-center mb-1">{profileData.name}</h2>
+              <p className="text-gray-600 text-center mb-4">{profileData.major}</p>
+
+              {/* AI Profile Score */}
+              <div className="w-full bg-gradient-to-br from-purple-500/10 to-blue-500/10 rounded-2xl p-4 mb-4">
+                <div className="flex items-center gap-3 mb-2">
+                  <AIAvatar size="sm" />
+                  <div>
+                    <p className="text-sm">AI Profile Score</p>
+                    <p className="text-xs text-gray-600">Profile Completeness</p>
+                  </div>
+                </div>
+                <div className="flex items-center gap-3">
+                  <div className="flex-1 bg-gray-200 rounded-full h-2">
+                    <div
+                      className="bg-gradient-to-r from-[var(--university-primary)] to-[var(--university-secondary)] h-2 rounded-full"
+                      style={{ width: "85%" }}
+                    />
+                  </div>
+                  <span className="text-sm">85%</span>
+                </div>
+              </div>
+
+              {/* Quick Stats */}
+              <div className="w-full space-y-3">
+                <div className="flex items-center gap-3 text-sm text-gray-600">
+                  <GraduationCap size={18} className="text-[var(--university-primary)]" />
+                  <span>GPA: {profileData.gpa}</span>
+                </div>
+                <div className="flex items-center gap-3 text-sm text-gray-600">
+                  <Calendar size={18} className="text-[var(--university-primary)]" />
+                  <span>Graduates {profileData.expectedGraduation}</span>
+                </div>
+                <div className="flex items-center gap-3 text-sm text-gray-600">
+                  <MapPin size={18} className="text-[var(--university-primary)]" />
+                  <span>{profileData.location}</span>
+                </div>
+              </div>
+            </div>
+
+            {/* Resume Upload */}
+            <div className="border-t border-gray-200 pt-6">
+              <Label className="mb-3 block">Resume</Label>
+              {resumeUploaded ? (
+                <div className="bg-green-50 border border-green-200 rounded-xl p-4 mb-3">
+                  <div className="flex items-center gap-3">
+                    <FileText className="text-green-600" size={20} />
+                    <div className="flex-1">
+                      <p className="text-sm">{resumeName}</p>
+                      <p className="text-xs text-gray-600">Uploaded</p>
+                    </div>
+                  </div>
+                </div>
+              ) : (
+                <div className="bg-gray-50 border-2 border-dashed border-gray-300 rounded-xl p-6 text-center mb-3">
+                  <Upload className="mx-auto mb-2 text-gray-400" size={32} />
+                  <p className="text-sm text-gray-600 mb-2">No resume uploaded</p>
+                </div>
+              )}
+              <input
+                type="file"
+                id="resume-upload"
+                className="hidden"
+                accept=".pdf,.doc,.docx"
+                onChange={handleFileUpload}
+              />
+              <motion.button
+                whileHover={{ scale: 1.02 }}
+                whileTap={{ scale: 0.98 }}
+                onClick={() => document.getElementById('resume-upload')?.click()}
+                className="w-full bg-gray-100 hover:bg-gray-200 rounded-xl py-3 flex items-center justify-center gap-2"
+              >
+                <Upload size={18} />
+                {resumeUploaded ? "Replace Resume" : "Upload Resume"}
+              </motion.button>
+            </div>
+          </div>
+        </motion.div>
+
+        {/* Right Column - Details */}
+        <motion.div
+          initial={{ x: 20, opacity: 0 }}
+          animate={{ x: 0, opacity: 1 }}
+          className="lg:col-span-2 space-y-6"
+        >
+          {/* Personal Information */}
+          <div className="bg-white/60 backdrop-blur-xl rounded-3xl p-6 border border-gray-200/50 shadow-lg">
+            <div className="flex items-center gap-3 mb-6">
+              <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-blue-500 to-cyan-600 flex items-center justify-center">
+                <User className="text-white" size={20} />
+              </div>
+              <h3>Personal Information</h3>
+            </div>
+
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div>
+                <Label htmlFor="name">Full Name</Label>
+                <Input
+                  id="name"
+                  value={profileData.name}
+                  onChange={(e) => setProfileData({ ...profileData, name: e.target.value })}
+                  disabled={!isEditing}
+                  className="mt-2"
+                />
+              </div>
+              <div>
+                <Label htmlFor="age">Age</Label>
+                <Input
+                  id="age"
+                  type="number"
+                  value={profileData.age}
+                  onChange={(e) => setProfileData({ ...profileData, age: e.target.value })}
+                  disabled={!isEditing}
+                  className="mt-2"
+                />
+              </div>
+              <div>
+                <Label htmlFor="email">Email</Label>
+                <Input
+                  id="email"
+                  type="email"
+                  value={profileData.email}
+                  onChange={(e) => setProfileData({ ...profileData, email: e.target.value })}
+                  disabled={!isEditing}
+                  className="mt-2"
+                />
+              </div>
+              <div>
+                <Label htmlFor="phone">Phone</Label>
+                <Input
+                  id="phone"
+                  type="tel"
+                  value={profileData.phone}
+                  onChange={(e) => setProfileData({ ...profileData, phone: e.target.value })}
+                  disabled={!isEditing}
+                  className="mt-2"
+                />
+              </div>
+              <div>
+                <Label htmlFor="location">Location</Label>
+                <Input
+                  id="location"
+                  value={profileData.location}
+                  onChange={(e) => setProfileData({ ...profileData, location: e.target.value })}
+                  disabled={!isEditing}
+                  className="mt-2"
+                />
+              </div>
+            </div>
+          </div>
+
+          {/* Academic Information */}
+          <div className="bg-white/60 backdrop-blur-xl rounded-3xl p-6 border border-gray-200/50 shadow-lg">
+            <div className="flex items-center gap-3 mb-6">
+              <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-purple-500 to-pink-600 flex items-center justify-center">
+                <GraduationCap className="text-white" size={20} />
+              </div>
+              <h3>Academic Information</h3>
+            </div>
+
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div>
+                <Label htmlFor="major">Major</Label>
+                <Input
+                  id="major"
+                  value={profileData.major}
+                  onChange={(e) => setProfileData({ ...profileData, major: e.target.value })}
+                  disabled={!isEditing}
+                  className="mt-2"
+                />
+              </div>
+              <div>
+                <Label htmlFor="minor">Minor</Label>
+                <Input
+                  id="minor"
+                  value={profileData.minor}
+                  onChange={(e) => setProfileData({ ...profileData, minor: e.target.value })}
+                  disabled={!isEditing}
+                  className="mt-2"
+                />
+              </div>
+              <div>
+                <Label htmlFor="gpa">GPA</Label>
+                <Input
+                  id="gpa"
+                  type="number"
+                  step="0.01"
+                  value={profileData.gpa}
+                  onChange={(e) => setProfileData({ ...profileData, gpa: e.target.value })}
+                  disabled={!isEditing}
+                  className="mt-2"
+                />
+              </div>
+              <div>
+                <Label htmlFor="graduation">Expected Graduation</Label>
+                <Input
+                  id="graduation"
+                  value={profileData.expectedGraduation}
+                  onChange={(e) => setProfileData({ ...profileData, expectedGraduation: e.target.value })}
+                  disabled={!isEditing}
+                  className="mt-2"
+                  placeholder="e.g., June 2026"
+                />
+              </div>
+            </div>
+
+            <div className="mt-4">
+              <Label htmlFor="bio">Bio</Label>
+              <Textarea
+                id="bio"
+                value={profileData.bio}
+                onChange={(e) => setProfileData({ ...profileData, bio: e.target.value })}
+                disabled={!isEditing}
+                className="mt-2 min-h-24"
+                placeholder="Tell us about yourself..."
+              />
+            </div>
+          </div>
+
+          {/* Skills & Interests */}
+          <div className="bg-white/60 backdrop-blur-xl rounded-3xl p-6 border border-gray-200/50 shadow-lg">
+            <div className="flex items-center gap-3 mb-6">
+              <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-amber-500 to-orange-600 flex items-center justify-center">
+                <Award className="text-white" size={20} />
+              </div>
+              <h3>Skills & Interests</h3>
+            </div>
+
+            <div className="space-y-4">
+              <div>
+                <Label className="mb-3 block">Technical Skills</Label>
+                <div className="flex flex-wrap gap-2">
+                  {profileData.skills.map((skill, index) => (
+                    <Badge key={index} className="bg-blue-500/10 text-blue-600 border-blue-200 px-3 py-1.5">
+                      {skill}
+                      {isEditing && (
+                        <X
+                          size={14}
+                          className="ml-2 cursor-pointer"
+                          onClick={() => {
+                            const newSkills = profileData.skills.filter((_, i) => i !== index);
+                            setProfileData({ ...profileData, skills: newSkills });
+                          }}
+                        />
+                      )}
+                    </Badge>
+                  ))}
+                  {isEditing && (
+                    <Badge variant="outline" className="cursor-pointer">
+                      + Add Skill
+                    </Badge>
+                  )}
+                </div>
+              </div>
+
+              <div>
+                <Label className="mb-3 block">Career Interests</Label>
+                <div className="flex flex-wrap gap-2">
+                  {profileData.interests.map((interest, index) => (
+                    <Badge key={index} className="bg-purple-500/10 text-purple-600 border-purple-200 px-3 py-1.5">
+                      {interest}
+                      {isEditing && (
+                        <X
+                          size={14}
+                          className="ml-2 cursor-pointer"
+                          onClick={() => {
+                            const newInterests = profileData.interests.filter((_, i) => i !== index);
+                            setProfileData({ ...profileData, interests: newInterests });
+                          }}
+                        />
+                      )}
+                    </Badge>
+                  ))}
+                  {isEditing && (
+                    <Badge variant="outline" className="cursor-pointer">
+                      + Add Interest
+                    </Badge>
+                  )}
+                </div>
+              </div>
+            </div>
+          </div>
+
+          {/* AI Insights */}
+          <div className="bg-gradient-to-br from-[var(--university-primary)] to-[var(--university-accent)] rounded-3xl p-6 text-white">
+            <div className="flex items-start gap-4">
+              <AIAvatar size="md" />
+              <div className="flex-1">
+                <h3 className="mb-2">AI Profile Insights</h3>
+                <p className="text-white/90 mb-4">
+                  Your profile is 85% complete! Adding more details about your projects and experience will help us find better opportunities. Consider uploading a portfolio link and adding certifications.
+                </p>
+                <div className="flex gap-3">
+                  <motion.button
+                    whileHover={{ scale: 1.02 }}
+                    whileTap={{ scale: 0.98 }}
+                    className="bg-white/20 hover:bg-white/30 backdrop-blur-sm px-4 py-2 rounded-xl transition-colors"
+                  >
+                    View Suggestions
+                  </motion.button>
+                </div>
+              </div>
+            </div>
+          </div>
+        </motion.div>
+      </div>
+    </div>
+  );
+}

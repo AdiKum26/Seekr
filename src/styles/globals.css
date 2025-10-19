@@ -1,0 +1,57 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+    /* University branding colors - customize these for each institution */
+    --university-primary: #4b2e83;
+    /* UW Purple */
+    --university-secondary: #85754d;
+    /* UW Gold */
+    --university-accent: #b7a57a;
+    --glow-color: rgba(75, 46, 131, 0.3);
+
+    /* Additional design system variables */
+    --radius: 0.625rem;
+    --font-weight-medium: 500;
+    --font-weight-normal: 400;
+}
+
+@layer base {
+    * {
+        @apply border-gray-200;
+    }
+
+    body {
+        @apply bg-gradient-to-br from-gray-50 to-gray-100 text-gray-900 antialiased;
+        font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen',
+            'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue',
+            sans-serif;
+    }
+
+    h1 {
+        @apply text-4xl font-bold tracking-tight;
+    }
+
+    h2 {
+        @apply text-3xl font-bold tracking-tight;
+    }
+
+    h3 {
+        @apply text-xl font-semibold;
+    }
+
+    h4 {
+        @apply text-lg font-semibold;
+    }
+}
+
+@layer components {
+    .btn-primary {
+        @apply bg-gradient-to-r from-[var(--university-primary)] to-[var(--university-secondary)] text-white px-4 py-2 rounded-xl hover:shadow-lg transition-all;
+    }
+
+    .card {
+        @apply bg-white/60 backdrop-blur-xl rounded-3xl p-6 border border-gray-200/50 shadow-lg hover:shadow-2xl transition-all;
+    }
+}

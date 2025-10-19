@@ -1,0 +1,610 @@
+import { Briefcase, Building2, Clock, ExternalLink, FlaskConical, Globe, GraduationCap, Heart, Lightbulb, MapPin, Search, Sparkles, Users } from "lucide-react";
+import { motion } from "motion/react";
+import { useState } from "react";
+import { AIAvatar } from "../components/chat/AIAvatar";
+import { Badge } from "../components/ui/Badge";
+import { Input } from "../components/ui/Input";
+
+interface Opportunity {
+  id: string;
+  title: string;
+  organization: string;
+  type: string;
+  category: string;
+  location: string;
+  commitment: string;
+  compensation: string;
+  deadline: string;
+  tags: string[];
+  url: string;
+  aiRecommended: boolean;
+  description: string;
+  requirements: string[];
+}
+
+const opportunities: Opportunity[] = [
+  // UW Research Opportunities
+  {
+    id: "1",
+    title: "AI/ML Research Assistant",
+    organization: "Paul G. Allen School of CSE",
+    type: "research",
+    category: "uw-research",
+    location: "UW Seattle Campus",
+    commitment: "10-15 hrs/week",
+    compensation: "$18-22/hr",
+    deadline: "Rolling",
+    tags: ["Machine Learning", "Python", "Research"],
+    url: "https://www.washington.edu/undergradresearch/find-a-position/database/",
+    aiRecommended: true,
+    description: "Work with Prof. Sham Kakade's lab on cutting-edge machine learning research. Assist with data analysis, model training, and paper preparation.",
+    requirements: ["CSE 446 or equivalent", "Python proficiency", "GPA 3.5+"]
+  },
+  {
+    id: "2",
+    title: "Undergraduate Research Program (URP)",
+    organization: "University of Washington",
+    type: "research",
+    category: "uw-research",
+    location: "Various Departments",
+    commitment: "Flexible",
+    compensation: "Course Credit or Paid",
+    deadline: "Quarterly",
+    tags: ["All Majors", "Research Experience", "Mentorship"],
+    url: "https://www.washington.edu/undergradresearch/",
+    aiRecommended: true,
+    description: "Central hub for finding undergraduate research opportunities across all UW departments. Offers funding, mentorship, and academic credit.",
+    requirements: ["UW Student", "Faculty Sponsor", "Research Proposal"]
+  },
+  {
+    id: "3",
+    title: "Mary Gates Research Scholar",
+    organization: "Mary Gates Endowment",
+    type: "research",
+    category: "uw-research",
+    location: "UW Seattle Campus",
+    commitment: "Quarter-long project",
+    compensation: "Up to $10,000",
+    deadline: "January 15, 2025",
+    tags: ["Research Grant", "All Disciplines", "Prestigious"],
+    url: "https://www.washington.edu/marygates/",
+    aiRecommended: true,
+    description: "Competitive research grants for original undergraduate research projects. Includes mentorship and presentation opportunities.",
+    requirements: ["UW Student", "Faculty Mentor", "Original Research"]
+  },
+  {
+    id: "4",
+    title: "NSF REU - Computer Vision Lab",
+    organization: "National Science Foundation",
+    type: "research",
+    category: "external",
+    location: "UW & Partner Universities",
+    commitment: "10 weeks (Summer)",
+    compensation: "$6,000 + Housing",
+    deadline: "February 1, 2025",
+    tags: ["Computer Vision", "Summer", "Funded"],
+    url: "https://www.nsf.gov/crssprgm/reu/reu_search.jsp",
+    aiRecommended: true,
+    description: "Intensive summer research experience in computer vision and deep learning. Includes stipend, housing, and travel support.",
+    requirements: ["CS/Engineering Major", "Junior/Senior", "U.S. Citizen/Permanent Resident"]
+  },
+
+  // Student Jobs
+  {
+    id: "5",
+    title: "Software Development Intern",
+    organization: "UW Information Technology",
+    type: "job",
+    category: "uw-jobs",
+    location: "UW Seattle Campus",
+    commitment: "15-20 hrs/week",
+    compensation: "$22-26/hr",
+    deadline: "Open",
+    tags: ["Software Development", "Full-Stack", "Student Job"],
+    url: "https://hr.uw.edu/jobs/",
+    aiRecommended: true,
+    description: "Develop and maintain web applications for UW IT services. Work with modern tech stack including React, Node.js, and AWS.",
+    requirements: ["CSE 154 or equivalent", "Web development experience", "Work-study eligible preferred"]
+  },
+  {
+    id: "6",
+    title: "Teaching Assistant - CSE 142",
+    organization: "Paul G. Allen School",
+    type: "job",
+    category: "uw-jobs",
+    location: "UW Seattle Campus",
+    commitment: "10-20 hrs/week",
+    compensation: "$18-21/hr",
+    deadline: "Before each quarter",
+    tags: ["Teaching", "CSE", "Mentorship"],
+    url: "https://www.cs.washington.edu/academics/ugrad/ta",
+    aiRecommended: true,
+    description: "Help students learn programming fundamentals. Lead quiz sections, hold office hours, and grade assignments.",
+    requirements: ["CSE 143 with A/A-", "Strong communication", "Prior TA experience preferred"]
+  },
+  {
+    id: "7",
+    title: "IMA Student Employment",
+    organization: "UW Recreation (IMA)",
+    type: "job",
+    category: "uw-jobs",
+    location: "Intramural Activities Building",
+    commitment: "10-20 hrs/week",
+    compensation: "$16.50-18/hr",
+    deadline: "Rolling",
+    tags: ["Recreation", "Customer Service", "Fitness"],
+    url: "https://www.washington.edu/ima/about-us/student-employment/",
+    aiRecommended: false,
+    description: "Work at campus recreational facilities. Positions include front desk, fitness instructor, lifeguard, and equipment manager.",
+    requirements: ["UW Student", "Customer service skills", "Certifications for specific roles"]
+  },
+  {
+    id: "8",
+    title: "Work-Study Positions",
+    organization: "UW Financial Aid Office",
+    type: "job",
+    category: "uw-jobs",
+    location: "Various Campus Locations",
+    commitment: "10-19 hrs/week",
+    compensation: "$16.28-20/hr",
+    deadline: "Rolling",
+    tags: ["Work-Study", "Financial Aid", "Flexible"],
+    url: "https://www.washington.edu/workstudy/",
+    aiRecommended: false,
+    description: "On-campus employment for students with Federal Work-Study awards. Positions available across all departments.",
+    requirements: ["Federal Work-Study Award", "UW Student"]
+  },
+
+  // External Opportunities
+  {
+    id: "9",
+    title: "Software Engineering Internship",
+    organization: "Various Tech Companies",
+    type: "internship",
+    category: "external",
+    location: "Seattle & Remote",
+    commitment: "Summer (12 weeks)",
+    compensation: "$30-60/hr + Benefits",
+    deadline: "September - January",
+    tags: ["Internship", "Tech", "High Pay"],
+    url: "https://careers.uw.edu/handshake/",
+    aiRecommended: true,
+    description: "Summer internships at top tech companies including Amazon, Microsoft, Google, Meta, and startups. Apply through Handshake.",
+    requirements: ["CS/Engineering Major", "Strong coding skills", "Projects/portfolio"]
+  },
+  {
+    id: "10",
+    title: "LinkedIn Job Search",
+    organization: "LinkedIn",
+    type: "job",
+    category: "external",
+    location: "Global",
+    commitment: "Varies",
+    compensation: "Varies",
+    deadline: "Continuous",
+    tags: ["Job Board", "Networking", "Professional"],
+    url: "https://www.linkedin.com/jobs/",
+    aiRecommended: false,
+    description: "Professional networking platform with extensive job and internship listings. Filter by location, company, and role.",
+    requirements: ["Professional profile", "Resume"]
+  },
+
+  // Student Organizations & Leadership
+  {
+    id: "11",
+    title: "HuskyLink Student Organizations",
+    organization: "ASUW",
+    type: "club",
+    category: "clubs",
+    location: "UW Campus",
+    commitment: "Varies by organization",
+    compensation: "Volunteer",
+    deadline: "Year-round",
+    tags: ["Leadership", "Networking", "Clubs"],
+    url: "https://huskylink.washington.edu/",
+    aiRecommended: true,
+    description: "Official database of 1,000+ Registered Student Organizations at UW. Find clubs for academics, culture, sports, and hobbies.",
+    requirements: ["UW Student"]
+  },
+  {
+    id: "12",
+    title: "Carlson Leadership Program",
+    organization: "Carlson Leadership & Public Service",
+    type: "leadership",
+    category: "clubs",
+    location: "UW Seattle Campus",
+    commitment: "Quarterly programs",
+    compensation: "Volunteer + Workshops",
+    deadline: "Various",
+    tags: ["Leadership", "Public Service", "Development"],
+    url: "https://carlson.washington.edu/",
+    aiRecommended: true,
+    description: "Leadership development and community service programs. Offers workshops, mentorship, and service opportunities.",
+    requirements: ["UW Student", "Commitment to service"]
+  },
+  {
+    id: "13",
+    title: "Dubstech CS Community",
+    organization: "Student Organization",
+    type: "club",
+    category: "clubs",
+    location: "UW Seattle Campus",
+    commitment: "Weekly meetings + events",
+    compensation: "Volunteer",
+    deadline: "Open to join",
+    tags: ["Computer Science", "Community", "Tech"],
+    url: "https://huskylink.washington.edu/",
+    aiRecommended: true,
+    description: "Student-run community for CS students. Hosts workshops, hackathons, and networking events with tech companies.",
+    requirements: ["Interest in CS", "UW Student"]
+  },
+  {
+    id: "14",
+    title: "Idealist Non-Profit Opportunities",
+    organization: "Idealist.org",
+    type: "volunteer",
+    category: "external",
+    location: "Global",
+    commitment: "Varies",
+    compensation: "Volunteer or Stipend",
+    deadline: "Continuous",
+    tags: ["Non-Profit", "Volunteer", "Social Impact"],
+    url: "https://www.idealist.org/",
+    aiRecommended: false,
+    description: "Premier search engine for non-profit jobs, internships, and volunteer opportunities worldwide.",
+    requirements: ["Varies by position"]
+  }
+];
+
+export function ResearchPage() {
+  const [searchQuery, setSearchQuery] = useState("");
+  const [selectedCategory, setSelectedCategory] = useState("all");
+
+  const categories = [
+    { id: "all", label: "All Opportunities", count: opportunities.length },
+    { id: "uw-research", label: "UW Research", count: opportunities.filter(o => o.category === "uw-research").length },
+    { id: "uw-jobs", label: "UW Jobs", count: opportunities.filter(o => o.category === "uw-jobs").length },
+    { id: "clubs", label: "Clubs & Leadership", count: opportunities.filter(o => o.category === "clubs").length },
+    { id: "external", label: "External", count: opportunities.filter(o => o.category === "external").length }
+  ];
+
+  const filteredOpportunities = opportunities.filter(opp => {
+    const matchesSearch = searchQuery === "" ||
+      opp.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      opp.organization.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      opp.tags.some(tag => tag.toLowerCase().includes(searchQuery.toLowerCase()));
+
+    const matchesCategory = selectedCategory === "all" || opp.category === selectedCategory;
+
+    return matchesSearch && matchesCategory;
+  });
+
+  const getTypeIcon = (type: string) => {
+    switch(type) {
+      case "research": return FlaskConical;
+      case "job": return Briefcase;
+      case "internship": return Lightbulb;
+      case "club": return Users;
+      case "leadership": return GraduationCap;
+      case "volunteer": return Heart;
+      default: return Briefcase;
+    }
+  };
+
+  const getTypeColor = (type: string) => {
+    switch(type) {
+      case "research": return "from-purple-500 to-pink-600";
+      case "job": return "from-blue-500 to-cyan-600";
+      case "internship": return "from-green-500 to-emerald-600";
+      case "club": return "from-amber-500 to-orange-600";
+      case "leadership": return "from-indigo-500 to-purple-600";
+      case "volunteer": return "from-red-500 to-pink-600";
+      default: return "from-gray-500 to-gray-600";
+    }
+  };
+
+  return (
+    <div className="max-w-7xl mx-auto px-8 py-8">
+      {/* Header */}
+      <motion.div
+        initial={{ y: -20, opacity: 0 }}
+        animate={{ y: 0, opacity: 1 }}
+        className="mb-8"
+      >
+        <h1 className="mb-2">Research & Opportunities</h1>
+        <p className="text-gray-600">
+          Discover research positions, student jobs, internships, and student organizations tailored to your interests
+        </p>
+      </motion.div>
+
+      {/* Stats Overview */}
+      <motion.div
+        initial={{ y: -20, opacity: 0 }}
+        animate={{ y: 0, opacity: 1 }}
+        transition={{ delay: 0.1 }}
+        className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-8"
+      >
+        <div className="bg-gradient-to-br from-purple-500/10 to-pink-500/10 backdrop-blur-xl rounded-2xl p-5 border border-gray-200/50">
+          <div className="flex items-center gap-3">
+            <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-purple-500 to-pink-600 flex items-center justify-center">
+              <FlaskConical className="text-white" size={20} />
+            </div>
+            <div>
+              <p className="text-2xl">{opportunities.filter(o => o.type === "research").length}</p>
+              <p className="text-sm text-gray-600">Research Positions</p>
+            </div>
+          </div>
+        </div>
+
+        <div className="bg-gradient-to-br from-blue-500/10 to-cyan-500/10 backdrop-blur-xl rounded-2xl p-5 border border-gray-200/50">
+          <div className="flex items-center gap-3">
+            <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-blue-500 to-cyan-600 flex items-center justify-center">
+              <Briefcase className="text-white" size={20} />
+            </div>
+            <div>
+              <p className="text-2xl">{opportunities.filter(o => o.type === "job" || o.type === "internship").length}</p>
+              <p className="text-sm text-gray-600">Jobs & Internships</p>
+            </div>
+          </div>
+        </div>
+
+        <div className="bg-gradient-to-br from-amber-500/10 to-orange-500/10 backdrop-blur-xl rounded-2xl p-5 border border-gray-200/50">
+          <div className="flex items-center gap-3">
+            <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-amber-500 to-orange-600 flex items-center justify-center">
+              <Users className="text-white" size={20} />
+            </div>
+            <div>
+              <p className="text-2xl">1000+</p>
+              <p className="text-sm text-gray-600">Student Organizations</p>
+            </div>
+          </div>
+        </div>
+
+        <div className="bg-gradient-to-br from-green-500/10 to-emerald-500/10 backdrop-blur-xl rounded-2xl p-5 border border-gray-200/50">
+          <div className="flex items-center gap-3">
+            <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-green-500 to-emerald-600 flex items-center justify-center">
+              <Sparkles className="text-white" size={20} />
+            </div>
+            <div>
+              <p className="text-2xl">{opportunities.filter(o => o.aiRecommended).length}</p>
+              <p className="text-sm text-gray-600">AI Recommended</p>
+            </div>
+          </div>
+        </div>
+      </motion.div>
+
+      {/* Search and Filters */}
+      <motion.div
+        initial={{ y: -20, opacity: 0 }}
+        animate={{ y: 0, opacity: 1 }}
+        transition={{ delay: 0.2 }}
+        className="mb-8 space-y-4"
+      >
+        <div className="relative">
+          <Search className="absolute left-4 top-1/2 transform -translate-y-1/2 text-gray-400" size={20} />
+          <Input
+            type="text"
+            placeholder="Search opportunities by title, organization, or tags..."
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
+            className="pl-12 py-6 rounded-xl border-gray-300 focus:border-[var(--university-primary)]"
+          />
+        </div>
+
+        <div className="flex gap-3 flex-wrap">
+          {categories.map((category) => (
+            <motion.button
+              key={category.id}
+              whileHover={{ scale: 1.02 }}
+              whileTap={{ scale: 0.98 }}
+              onClick={() => setSelectedCategory(category.id)}
+              className={`px-4 py-2 rounded-xl transition-all ${
+                selectedCategory === category.id
+                  ? "bg-[var(--university-primary)] text-white shadow-lg"
+                  : "bg-white border border-gray-200 text-gray-700 hover:border-[var(--university-primary)]"
+              }`}
+            >
+              {category.label}
+              <Badge className="ml-2 bg-white/20">{category.count}</Badge>
+            </motion.button>
+          ))}
+        </div>
+      </motion.div>
+
+      {/* AI Insights Banner */}
+      <motion.div
+        initial={{ y: 20, opacity: 0 }}
+        animate={{ y: 0, opacity: 1 }}
+        transition={{ delay: 0.3 }}
+        className="mb-8 bg-gradient-to-br from-purple-500/10 to-blue-500/10 rounded-3xl p-6 border border-purple-200/50"
+      >
+        <div className="flex items-start gap-4">
+          <AIAvatar size="md" />
+          <div className="flex-1">
+            <h3 className="mb-2">Personalized Opportunity Matches</h3>
+            <p className="text-gray-700 mb-4">
+              Based on your CS major and AI interests, we found <span className="font-semibold">8 highly relevant opportunities</span> including ML research positions and summer internships. The AI/ML Research Assistant position in the Allen School aligns perfectly with your coursework in CSE 446.
+            </p>
+            <div className="flex gap-3">
+              <motion.button
+                whileHover={{ scale: 1.02 }}
+                whileTap={{ scale: 0.98 }}
+                className="bg-[var(--university-primary)] text-white px-4 py-2 rounded-xl"
+              >
+                View My Matches
+              </motion.button>
+              <motion.button
+                whileHover={{ scale: 1.02 }}
+                whileTap={{ scale: 0.98 }}
+                className="bg-white border border-gray-200 px-4 py-2 rounded-xl"
+              >
+                Set Job Alerts
+              </motion.button>
+            </div>
+          </div>
+        </div>
+      </motion.div>
+
+      {/* Opportunity Cards */}
+      <div className="grid grid-cols-1 gap-6">
+        {filteredOpportunities.map((opp, index) => {
+          const TypeIcon = getTypeIcon(opp.type);
+          const typeColor = getTypeColor(opp.type);
+
+          return (
+            <motion.div
+              key={opp.id}
+              initial={{ y: 20, opacity: 0 }}
+              animate={{ y: 0, opacity: 1 }}
+              transition={{ delay: index * 0.05 }}
+              whileHover={{ y: -4 }}
+              className="bg-white rounded-3xl p-6 border border-gray-200/50 shadow-lg hover:shadow-2xl transition-all"
+            >
+              <div className="flex items-start gap-4 mb-4">
+                <div className={`w-14 h-14 rounded-2xl bg-gradient-to-br ${typeColor} flex items-center justify-center flex-shrink-0`}>
+                  <TypeIcon className="text-white" size={24} />
+                </div>
+
+                <div className="flex-1">
+                  <div className="flex items-center gap-3 mb-2">
+                    <h3>{opp.title}</h3>
+                    {opp.aiRecommended && (
+                      <Badge className="bg-purple-500/10 text-purple-600 border-purple-200">
+                        <Sparkles size={12} className="mr-1" />
+                        AI Match
+                      </Badge>
+                    )}
+                  </div>
+
+                  <div className="flex items-center gap-4 text-sm text-gray-600 mb-3">
+                    <div className="flex items-center gap-1">
+                      <Building2 size={14} />
+                      {opp.organization}
+                    </div>
+                    <div className="flex items-center gap-1">
+                      <MapPin size={14} />
+                      {opp.location}
+                    </div>
+                    <div className="flex items-center gap-1">
+                      <Clock size={14} />
+                      {opp.commitment}
+                    </div>
+                  </div>
+
+                  <p className="text-gray-700 mb-4">{opp.description}</p>
+
+                  <div className="flex flex-wrap gap-2 mb-4">
+                    {opp.tags.map((tag, i) => (
+                      <Badge key={i} variant="outline" className="text-xs">
+                        {tag}
+                      </Badge>
+                    ))}
+                  </div>
+
+                  <div className="mb-4">
+                    <p className="text-sm text-gray-600 mb-2">Requirements:</p>
+                    <div className="flex flex-wrap gap-2">
+                      {opp.requirements.map((req, i) => (
+                        <Badge key={i} className="bg-blue-500/10 text-blue-600 border-blue-200 text-xs">
+                          {req}
+                        </Badge>
+                      ))}
+                    </div>
+                  </div>
+                </div>
+
+                <div className="text-right">
+                  <div className="bg-gradient-to-br from-green-500/10 to-emerald-500/10 rounded-2xl px-4 py-3 mb-3">
+                    <p className="text-sm text-gray-600">Compensation</p>
+                    <p className="text-lg text-green-600">{opp.compensation}</p>
+                  </div>
+                  <div className="bg-gray-50 rounded-xl px-3 py-2">
+                    <p className="text-xs text-gray-600">Deadline</p>
+                    <p className="text-sm">{opp.deadline}</p>
+                  </div>
+                </div>
+              </div>
+
+              <div className="flex gap-3">
+                <motion.a
+                  href={opp.url}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  whileHover={{ scale: 1.02 }}
+                  whileTap={{ scale: 0.98 }}
+                  className="flex-1 bg-gradient-to-r from-[var(--university-primary)] to-[var(--university-secondary)] text-white rounded-xl py-3 flex items-center justify-center gap-2"
+                >
+                  Learn More
+                  <ExternalLink size={16} />
+                </motion.a>
+
+                <motion.button
+                  whileHover={{ scale: 1.02 }}
+                  whileTap={{ scale: 0.98 }}
+                  className="px-6 bg-gray-100 hover:bg-gray-200 rounded-xl transition-colors"
+                >
+                  Save
+                </motion.button>
+
+                <motion.button
+                  whileHover={{ scale: 1.02 }}
+                  whileTap={{ scale: 0.98 }}
+                  className="px-6 bg-gray-100 hover:bg-gray-200 rounded-xl transition-colors"
+                >
+                  Share
+                </motion.button>
+              </div>
+            </motion.div>
+          );
+        })}
+      </div>
+
+      {/* Additional Resources */}
+      <motion.div
+        initial={{ y: 20, opacity: 0 }}
+        animate={{ y: 0, opacity: 1 }}
+        transition={{ delay: 0.5 }}
+        className="mt-8 bg-white rounded-3xl p-6 border border-gray-200/50 shadow-lg"
+      >
+        <h3 className="mb-4">Additional Resources</h3>
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <a href="https://careers.uw.edu/handshake/" target="_blank" rel="noopener noreferrer" className="flex items-center gap-3 p-4 bg-gray-50 rounded-xl hover:bg-gray-100 transition-colors">
+            <Briefcase className="text-[var(--university-primary)]" size={24} />
+            <div>
+              <p className="font-medium">Handshake at UW</p>
+              <p className="text-sm text-gray-600">Jobs, internships & interviews</p>
+            </div>
+            <ExternalLink className="ml-auto text-gray-400" size={16} />
+          </a>
+
+          <a href="https://www.washington.edu/undergradresearch/" target="_blank" rel="noopener noreferrer" className="flex items-center gap-3 p-4 bg-gray-50 rounded-xl hover:bg-gray-100 transition-colors">
+            <FlaskConical className="text-[var(--university-primary)]" size={24} />
+            <div>
+              <p className="font-medium">UW Undergraduate Research</p>
+              <p className="text-sm text-gray-600">Central research hub</p>
+            </div>
+            <ExternalLink className="ml-auto text-gray-400" size={16} />
+          </a>
+
+          <a href="https://huskylink.washington.edu/" target="_blank" rel="noopener noreferrer" className="flex items-center gap-3 p-4 bg-gray-50 rounded-xl hover:bg-gray-100 transition-colors">
+            <Users className="text-[var(--university-primary)]" size={24} />
+            <div>
+              <p className="font-medium">HuskyLink</p>
+              <p className="text-sm text-gray-600">1,000+ student organizations</p>
+            </div>
+            <ExternalLink className="ml-auto text-gray-400" size={16} />
+          </a>
+
+          <a href="https://www.linkedin.com/jobs/" target="_blank" rel="noopener noreferrer" className="flex items-center gap-3 p-4 bg-gray-50 rounded-xl hover:bg-gray-100 transition-colors">
+            <Globe className="text-[var(--university-primary)]" size={24} />
+            <div>
+              <p className="font-medium">LinkedIn Jobs</p>
+              <p className="text-sm text-gray-600">Professional networking & jobs</p>
+            </div>
+            <ExternalLink className="ml-auto text-gray-400" size={16} />
+          </a>
+        </div>
+      </motion.div>
+    </div>
+  );
+}
