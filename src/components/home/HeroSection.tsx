@@ -1,5 +1,5 @@
+import { Search, Sparkles, Target, TrendingUp } from "lucide-react";
 import { motion } from "motion/react";
-import { Search, Sparkles, TrendingUp, Target } from "lucide-react";
 import { useState } from "react";
 
 const suggestionChips = [
@@ -11,6 +11,14 @@ const suggestionChips = [
 export function HeroSection() {
   const [searchValue, setSearchValue] = useState("");
   const [isFocused, setIsFocused] = useState(false);
+
+  const handleAskAI = () => {
+    // Trigger the AI chat dock to open with the search value
+    const event = new CustomEvent('openAIchat', {
+      detail: { message: searchValue || "Help me find opportunities" }
+    });
+    window.dispatchEvent(event);
+  };
 
   return (
     <div className="relative overflow-hidden">
@@ -88,6 +96,7 @@ export function HeroSection() {
               <motion.button
                 whileHover={{ scale: 1.05 }}
                 whileTap={{ scale: 0.95 }}
+                onClick={handleAskAI}
                 className="ml-3 px-6 py-2 bg-gradient-to-r from-[var(--university-primary)] to-[var(--university-accent)] text-white rounded-xl flex items-center gap-2"
               >
                 <Sparkles size={16} />
@@ -111,6 +120,12 @@ export function HeroSection() {
                 key={index}
                 whileHover={{ scale: 1.05, y: -2 }}
                 whileTap={{ scale: 0.95 }}
+                onClick={() => {
+                  const event = new CustomEvent('openAIchat', {
+                    detail: { message: `Find me ${chip.label.toLowerCase()}` }
+                  });
+                  window.dispatchEvent(event);
+                }}
                 className={`${chip.color} px-4 py-2 rounded-full flex items-center gap-2 backdrop-blur-sm`}
               >
                 <Icon size={16} />

@@ -24,7 +24,7 @@ function extractGPA(text: string): string | undefined {
 
   for (const pattern of gpaPatterns) {
     const match = text.match(pattern);
-    if (match) {
+    if (match && match[1]) {
       const gpa = parseFloat(match[1]);
       if (gpa >= 0 && gpa <= 4.0) {
         return gpa.toFixed(2);
@@ -51,7 +51,7 @@ function extractMajor(text: string): string | undefined {
 
   for (const pattern of majorPatterns) {
     const match = text.match(pattern);
-    if (match) {
+    if (match && match[1]) {
       const major = match[1].trim();
       if (major.length > 3 && major.length < 50) {
         return major;
@@ -78,7 +78,7 @@ function extractGraduationYear(text: string): string | undefined {
 
   for (const pattern of yearPatterns) {
     const match = text.match(pattern);
-    if (match) {
+    if (match && match[1]) {
       const year = parseInt(match[1]);
       const currentYear = new Date().getFullYear();
       if (year >= currentYear - 10 && year <= currentYear + 10) {
@@ -152,7 +152,7 @@ function extractSkills(text: string): string[] {
 async function parsePDF(file: File): Promise<string> {
   // For now, we'll provide a simple message for PDF files
   // In a production environment, you might want to use a backend service for PDF parsing
-  return new Promise((resolve, reject) => {
+  return new Promise((resolve) => {
     // Create a simple text representation for demonstration
     const fileName = file.name.replace('.pdf', '');
     const mockText = `
